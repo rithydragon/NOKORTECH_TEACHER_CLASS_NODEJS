@@ -1,0 +1,31 @@
+[
+    {
+        "title": "student_and_enrollment",
+        "icon": "<i class='ri-graduation-cap-line'></i>",
+        "menu": [
+            {
+                "permission": "ENROLLMENT",
+                "color": "#F67D62",
+                "id": "nav_enrollment",
+                "title": "enrollment",
+                "icon": "<i class='ri-article-line'></i>",
+                "href": "/Enrollment"
+            },
+            {
+                "permission": "STUDENT",
+                "id": "nav_student",
+                "title": "student",
+                "icon": "<i class='ri-user-2-line'></i>",
+                "href": "/Student",
+                "showGlobal": true
+            },
+            {
+                "permission": "STUDENTCLASS",
+                "id": "nav_student_class",
+                "title": "student_and_class",
+                "icon": "<i class='ri-presentation-line'></i>",
+                "href": "/StudentClass"
+            }
+        ]
+    }
+]

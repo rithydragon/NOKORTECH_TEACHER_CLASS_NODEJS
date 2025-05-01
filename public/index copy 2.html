@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOKORTECH Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style lang="scss">
+        /* Sass Variables */
+        $primary-color: #4f46e5;
+        $success-color: #10b981;
+        $warning-color: #f59e0b;
+        $danger-color: #ef4444;
+        $text-color: #1f2937;
+        $bg-color: #f9fafb;
+        $sidebar-bg: #3730a3;
+        $sidebar-text: #ffffff;
+        $card-bg: #ffffff;
+        $transition-speed: 0.3s;
+
+        /* Base Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: $bg-color;
+            color: $text-color;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* API Status Indicators */
+        .api-status {
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all $transition-speed;
+
+            &.healthy {
+                background-color: rgba($success-color, 0.1);
+                color: darken($success-color, 20%);
+            }
+
+            &.degraded {
+                background-color: rgba($warning-color, 0.1);
+                color: darken($warning-color, 20%);
+            }
+
+            &.down {
+                background-color: rgba($danger-color, 0.1);
+                color: darken($danger-color, 20%);
+            }
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: $sidebar-bg;
+            color: $sidebar-text;
+            width: 16rem;
+            padding: 1.75rem 0.5rem;
+            position: fixed;
+            height: 100%;
+            transition: all $transition-speed;
+
+            nav a {
+                display: block;
+                padding: 0.625rem 1rem;
+                border-radius: 0.375rem;
+                transition: all $transition-speed;
+
+                &:hover {
+                    background-color: rgba($sidebar-text, 0.1);
+                }
+
+                &.active {
+                    background-color: rgba($sidebar-text, 0.2);
+                }
+            }
+        }
+
+        /* Main Content Area */
+        .content-area {
+            margin-left: 16rem;
+            flex: 1;
+            padding: 2rem;
+            transition: all $transition-speed;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: $card-bg;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all $transition-speed;
+            cursor: pointer;
+
+            &-primary {
+                background-color: $primary-color;
+                color: white;
+
+                &:hover {
+                    background-color: darken($primary-color, 10%);
+                }
+            }
+
+            &-secondary {
+                background-color: $success-color;
+                color: white;
+
+                &:hover {
+                    background-color: darken($success-color, 10%);
+                }
+            }
+
+            &-danger {
+                background-color: $danger-color;
+                color: white;
+
+                &:hover {
+                    background-color: darken($danger-color, 10%);
+                }
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+
+        /* Database Status Cards */
+        .db-status-card {
+            background-color: lighten($bg-color, 2%);
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            transition: all $transition-speed;
+
+            &:hover {
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+
+            &-content {
+                background-color: $card-bg;
+                border-radius: 0.5rem;
+                padding: 1.5rem;
+                width: 100%;
+                max-width: 28rem;
+            }
+        }
+
+        /* Form Styles */
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+
+            &:focus {
+                outline: none;
+                border-color: $primary-color;
+                box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+            }
+        }
+
+        /* Table Styles */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+
+            th, td {
+                padding: 0.75rem 1.5rem;
+                text-align: left;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            th {
+                background-color: lighten($bg-color, 2%);
+                font-weight: 500;
+                color: #6b7280;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.05em;
+            }
+
+            tr:hover {
+                background-color: lighten($bg-color, 1%);
+            }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .content-area {
+                margin-left: 0;
+            }
+
+            .grid-cols-1 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation for loading spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="text-white flex items-center space-x-2 px-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+                </path>
+            </svg>
+            <span class="text-xl font-bold">NOKORTECH</span>
+        </div>
+        <nav>
+            <a href="#" class="active"><i class="mr-2">📊</i> Dashboard</a>
+            <a href="#api-status"><i class="mr-2">🔌</i> API Status</a>
+            <a href="#metrics"><i class="mr-2">📈</i> Server Metrics</a>
+            <a href="#admin"><i class="mr-2">👨‍💼</i> Admin Tools</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-area">
+        <header class="card mb-6">
+            <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+            <p>Welcome back, Administrator</p>
+        </header>
+
+        <!-- API Status Section -->
+        <section id="api-status" class="mb-8">
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <span class="mr-2">🔌</span> API Status Monitor
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="api-status healthy">
+                        <h3 class="font-medium">Main API</h3>
+                        <p class="text-sm">/api/v1</p>
+                        <div class="mt-2 flex justify-between items-center">
+                            <span>🟢 Operational</span>
+                            <span class="text-xs">200 OK</span>
+                        </div>
+                    </div>
+                    <div class="api-status healthy">
+                        <h3 class="font-medium">Database</h3>
+                        <p class="text-sm">MongoDB</p>
+                        <div class="mt-2 flex justify-between items-center">
+                            <span>🟢 Connected</span>
+                            <span class="text-xs">Ping 12ms</span>
+                        </div>
+                    </div>
+                    <div class="api-status degraded">
+                        <h3 class="font-medium">Cache</h3>
+                        <p class="text-sm">Redis</p>
+                        <div class="mt-2 flex justify-between items-center">
+                            <span>🟡 Degraded</span>
+                            <span class="text-xs">Timeout 3/10</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="refresh-status" class="btn-primary mt-4">
+                    Refresh Status
+                </button>
+            </div>
+        </section>
+
+        <!-- Server Metrics Section -->
+        <section id="metrics" class="mb-8">
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <span class="mr-2">📈</span> Server Metrics
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <canvas id="cpuChart" height="200"></canvas>
+                    </div>
+                    <div>
+                        <canvas id="memoryChart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="mt-6 grid grid-cols-4 gap-4 text-center">
+                    <div class="db-status-card">
+                        <div class="text-sm text-gray-500">CPU Usage</div>
+                        <div class="text-2xl font-bold" id="cpu-usage">23%</div>
+                    </div>
+                    <div class="db-status-card">
+                        <div class="text-sm text-gray-500">Memory</div>
+                        <div class="text-2xl font-bold" id="memory-usage">1.2/4GB</div>
+                    </div>
+                    <div class="db-status-card">
+                        <div class="text-sm text-gray-500">Uptime</div>
+                        <div class="text-2xl font-bold" id="uptime">2d 4h</div>
+                    </div>
+                    <div class="db-status-card">
+                        <div class="text-sm text-gray-500">Requests</div>
+                        <div class="text-2xl font-bold" id="request-count">1,243</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Tools Section -->
+        <section id="admin">
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <span class="mr-2">👨‍💼</span> Admin Tools
+                </h2>
+
+                <!-- Database Status Card -->
+                <div class="mb-6 bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-medium mb-3 flex items-center">
+                        <span class="mr-2">🗃️</span> Database Status
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="db-status-card" id="mysql-status">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">MySQL</span>
+                                <span class="status-indicator">🔴</span>
+                            </div>
+                            <div class="text-sm mt-1" id="mysql-details">Checking...</div>
+                        </div>
+                        <div class="db-status-card">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">Tables</span>
+                                <span id="table-count">0</span>
+                            </div>
+                        </div>
+                        <div class="db-status-card">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">Size</span>
+                                <span id="db-size">0 MB</span>
+                            </div>
+                        </div>
+                        <div class="db-status-card">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">Connections</span>
+                                <span id="connection-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="refresh-db" class="btn-primary mt-3 text-sm">
+                        Refresh Status
+                    </button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Server Actions -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition">
+                        <h3 class="font-medium mb-2">Server Actions</h3>
+                        <button onclick="restartServices()"
+                            class="w-full bg-blue-100 text-blue-800 p-2 rounded mb-2 hover:bg-blue-200 transition">
+                            Restart Services
+                        </button>
+                        <button onclick="clearCache()"
+                            class="w-full bg-blue-100 text-blue-800 p-2 rounded hover:bg-blue-200 transition">
+                            Clear Cache
+                        </button>
+                    </div>
+
+                    <!-- Database Tools -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition">
+                        <h3 class="font-medium mb-2">Database</h3>
+                        <button onclick="backupDatabase()"
+                            class="w-full bg-green-100 text-green-800 p-2 rounded mb-2 hover:bg-green-200 transition">
+                            Backup Now
+                        </button>
+                        <button onclick="optimizeDatabase()"
+                            class="w-full bg-green-100 text-green-800 p-2 rounded hover:bg-green-200 transition">
+                            Optimize Tables
+                        </button>
+                    </div>
+
+                    <!-- User Management -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition">
+                        <h3 class="font-medium mb-2">User Management</h3>
+                        <button onclick="showAddUserModal()"
+                            class="w-full bg-purple-100 text-purple-800 p-2 rounded mb-2 hover:bg-purple-200 transition">
+                            Add New User
+                        </button>
+                        <button onclick="showAuditLog()"
+                            class="w-full bg-purple-100 text-purple-800 p-2 rounded hover:bg-purple-200 transition">
+                            View Audit Log
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add User Modal -->
+        <div id="addUserModal" class="modal hidden">
+            <div class="modal-content">
+                <h3 class="text-lg font-medium mb-4">Add New User</h3>
+                <form id="userForm">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Username</label>
+                        <input type="text" class="form-input" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Email</label>
+                        <input type="email" class="form-input" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Role</label>
+                        <select class="form-input">
+                            <option>Admin</option>
+                            <option>Editor</option>
+                            <option>Viewer</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="hideAddUserModal()"
+                            class="px-4 py-2 border rounded hover:bg-gray-100">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            Save User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Routes Section -->
+        <section id="api-routes" class="mt-8">
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <span class="mr-2">🌐</span> API Routes
+                    <button id="refresh-routes" class="btn-primary ml-auto text-sm">
+                        Refresh Routes
+                    </button>
+                </h2>
+
+                <div class="mb-4 flex items-center">
+                    <input type="text" id="route-search" placeholder="Search routes..." class="form-input max-w-md">
+                    <div class="ml-4 text-sm text-gray-500" id="route-count">0 routes</div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Path</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="routes-table-body">
+                            <!-- Routes will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // JavaScript remains the same as in your original implementation
+        // API Status Checker
+        document.getElementById('refresh-status').addEventListener('click', async () => {
+            const statusElements = document.querySelectorAll('.api-status');
+            statusElements.forEach(el => {
+                el.innerHTML += '<div class="mt-2 text-xs">Checking...</div>';
+                el.classList.remove('healthy', 'degraded', 'down');
+                el.classList.add('degraded');
+            });
+
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                updateStatus(data);
+            } catch (error) {
+                document.querySelectorAll('.api-status').forEach(el => {
+                    el.classList.remove('healthy', 'degraded');
+                    el.classList.add('down');
+                });
+            }
+        });
+
+        // Server Metrics Charts
+        const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+        const cpuChart = new Chart(cpuCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 20 }, (_, i) => `${i * 5}s`),
+                datasets: [{
+                    label: 'CPU Usage %',
+                    data: Array.from({ length: 20 }, () => Math.floor(Math.random() * 100)),
+                    borderColor: 'rgb(79, 70, 229)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            }
+        });
+
+        const memoryCtx = document.getElementById('memoryChart').getContext('2d');
+        const memoryChart = new Chart(memoryCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Used', 'Free', 'Cached'],
+                datasets: [{
+                    label: 'Memory (GB)',
+                    data: [1.2, 2.1, 0.7],
+                    backgroundColor: [
+                        'rgba(79, 70, 229, 0.7)',
+                        'rgba(99, 102, 241, 0.7)',
+                        'rgba(129, 140, 248, 0.7)'
+                    ]
+                }]
+            }
+        });
+
+        // Simulate live updates
+        setInterval(() => {
+            cpuChart.data.datasets[0].data = cpuChart.data.datasets[0].data.slice(1).concat([Math.floor(Math.random() * 100)]);
+            cpuChart.update();
+            document.getElementById('cpu-usage').textContent = `${Math.floor(Math.random() * 100)}%`;
+            document.getElementById('request-count').textContent =
+                (parseInt(document.getElementById('request-count').textContent.replace(/,/g, '')) + Math.floor(Math.random() * 3));
+        }, 3000);
+
+        function updateStatus(data) {
+            setTimeout(() => {
+                document.querySelectorAll('.api-status').forEach((el, i) => {
+                    const statuses = ['healthy', 'degraded', 'healthy'];
+                    el.classList.remove('healthy', 'degraded', 'down');
+                    el.classList.add(statuses[i]);
+                    el.querySelector('div:last-child').innerHTML =
+                        i === 2 ? '<span>🟡 Degraded</span><span class="text-xs">Timeout 3/10</span>' :
+                            '<span>🟢 Operational</span><span class="text-xs">200 OK</span>';
+                });
+            }, 1000);
+        }
+
+        async function checkDatabaseStatus() {
+            const statusElement = document.getElementById('mysql-status');
+            const detailsElement = document.getElementById('mysql-details');
+
+            try {
+                const response = await fetch('/api/db/status');
+                const data = await response.json();
+
+                if (data.connected) {
+                    statusElement.innerHTML = statusElement.innerHTML.replace('🔴', '🟢');
+                    statusElement.classList.add('bg-green-50', 'text-green-800');
+                    detailsElement.textContent = `Version ${data.version} | Ping ${data.ping}ms`;
+                    document.getElementById('table-count').textContent = data.tableCount;
+                    document.getElementById('db-size').textContent = data.size;
+                    document.getElementById('connection-count').textContent = data.connections;
+                } else {
+                    statusElement.innerHTML = statusElement.innerHTML.replace('🔴', '🔴');
+                    statusElement.classList.add('bg-red-50', 'text-red-800');
+                    detailsElement.textContent = data.error || 'Connection failed';
+                }
+            } catch (error) {
+                statusElement.innerHTML = statusElement.innerHTML.replace('🔴', '🔴');
+                statusElement.classList.add('bg-red-50', 'text-red-800');
+                detailsElement.textContent = 'Connection error';
+            }
+        }
+
+        async function restartServices() {
+            try {
+                const response = await fetch('/api/server/restart', { method: 'POST' });
+                showAlert(response.ok ? 'Services restarted successfully' : 'Restart failed');
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function backupDatabase() {
+            try {
+                const response = await fetch('/api/db/backup', { method: 'POST' });
+                const data = await response.json();
+                showAlert(`Backup created: ${data.filename}`);
+            } catch (error) {
+                showAlert('Backup failed: ' + error.message, 'error');
+            }
+        }
+
+        function showAddUserModal() {
+            document.getElementById('addUserModal').classList.remove('hidden');
+        }
+
+        function hideAddUserModal() {
+            document.getElementById('addUserModal').classList.add('hidden');
+        }
+
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAddUserModal();
+            showAlert('User added successfully');
+        });
+
+        function showAlert(message, type = 'success') {
+            const alert = document.createElement('div');
+            alert.className = `fixed top-4 right-4 p-4 rounded ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            alert.textContent = message;
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        document.getElementById('refresh-db').addEventListener('click', checkDatabaseStatus);
+        checkDatabaseStatus();
+
+        async function loadRoutes() {
+            try {
+                const response = await fetch('/api/routes');
+                const routes = await response.json();
+                const tableBody = document.getElementById('routes-table-body');
+                tableBody.innerHTML = '';
+
+                routes.forEach(route => {
+                    const row = document.createElement('tr');
+                    const methodsCell = document.createElement('td');
+                    methodsCell.className = 'px-6 py-4 whitespace-nowrap';
+                    route.methods.forEach(method => {
+                        const methodBadge = document.createElement('span');
+                        methodBadge.className = `px-2 py-1 text-xs rounded mr-1 ${method === 'GET' ? 'bg-blue-100 text-blue-800' :
+                            method === 'POST' ? 'bg-green-100 text-green-800' :
+                                method === 'PUT' ? 'bg-yellow-100 text-yellow-800' :
+                                    method === 'DELETE' ? 'bg-red-100 text-red-800' : 'bg-gray-100'
+                            }`;
+                        methodBadge.textContent = method;
+                        methodsCell.appendChild(methodBadge);
+                    });
+
+                    const pathCell = document.createElement('td');
+                    pathCell.className = 'px-6 py-4 whitespace-nowrap font-mono text-sm';
+                    pathCell.textContent = route.path;
+
+                    const actionsCell = document.createElement('td');
+                    actionsCell.className = 'px-6 py-4 whitespace-nowrap';
+                    const testButton = document.createElement('button');
+                    testButton.className = 'text-blue-600 hover:text-blue-900 mr-3';
+                    testButton.innerHTML = '<i class="fas fa-bolt"></i> Test';
+                    testButton.onclick = () => testEndpoint(route);
+                    actionsCell.appendChild(testButton);
+
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'text-gray-600 hover:text-gray-900';
+                    copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    copyButton.onclick = () => {
+                        navigator.clipboard.writeText(route.path);
+                        alert('Copied: ' + route.path);
+                    };
+                    actionsCell.appendChild(copyButton);
+
+                    row.appendChild(methodsCell);
+                    row.appendChild(pathCell);
+                    row.appendChild(actionsCell);
+                    tableBody.appendChild(row);
+                });
+
+                document.getElementById('route-count').textContent = `${routes.length} routes`;
+                setupSearch();
+            } catch (error) {
+                console.error('Failed to load routes:', error);
+            }
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('route-search');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#routes-table-body tr');
+
+                rows.forEach(row => {
+                    const path = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const methods = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                    if (path.includes(searchTerm) || methods.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        function testEndpoint(route) {
+            const method = route.methods[0];
+            const url = route.path;
+            fetch(url, { method })
+                .then(response => alert(`Tested ${method} ${url}\nStatus: ${response.status}`))
+                .catch(error => alert(`Error testing ${url}: ${error.message}`));
+        }
+
+        document.getElementById('refresh-routes').addEventListener('click', loadRoutes);
+        loadRoutes();
+    </script>
+</body>
+
+</html>
