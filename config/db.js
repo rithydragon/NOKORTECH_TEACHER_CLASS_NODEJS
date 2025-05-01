@@ -22,7 +22,7 @@ const localConfig = {
   host: '127.0.0.1',
   user: 'root',
   password: 'iThy@123',
-  database: 'NOKORTECH',
+  database: 'NOKORTECH_LMS_DB',
   port: 3306,
   waitForConnections: true,
   connectionLimit: 10,

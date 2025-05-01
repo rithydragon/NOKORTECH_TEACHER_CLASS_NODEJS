@@ -56,25 +56,37 @@ app.use(cookieParser());
 const allowedOrigins = [
   process.env.CLIENT_URL, 
   'http://localhost:3000',
-  'http://localhost:4582'
+  'http://localhost:4582',
+  'https://nokortechlmsclassapp.vercel.app',
+  'https://nokortech.app'
 ].filter(Boolean);
+
+
+// app.use(cors({
+//   origin: ['https://nokortechlmsclassapp.vercel.app', 'https://nokortech.app'],
+//   credentials: true
+// }));
 
 // Update your CORS middleware to be more permissive in development
 app.use(cors({
   origin: function (origin, callback) {
+       // Allow requests with no origin (like mobile apps or curl)
+       if (!origin) return callback(null, true);
+
     if (process.env.NODE_ENV === 'development') {
-      callback(null, true);
+      return callback(null, true);
     } else {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return  callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        return callback(new Error('Not allowed by CORS: ' + origin));
       }
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Set-Cookie'],
+  // allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Set-Cookie']
 }));
 
@@ -140,6 +152,15 @@ app.use('/', TelegramStore);
 // 6. ERROR HANDLING
 // ======================
 // Replace your current error handler with this
+
+app.use((err, req, res, next) => {
+  if (err.message.includes('CORS')) {
+    console.error('CORS error:', err.message);
+    return res.status(403).json({ error: 'CORS blocked the request.' });
+  }
+  next(err);
+});
+
 app.use((err, req, res, next) => {
   console.error('Error:', {
     message: err.message,
@@ -194,12 +215,13 @@ app.get('*', (req, res) => {
 
 // ======================
 // 8. SERVER START
-// ======================
-const PORT = process.env.PORT || 3001;
+// ======================const PORT = process.env.PORT || 10000;
+
 app.listen(PORT, async () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  const env = process.env.NODE_ENV || 'development';
+  console.log(`🚀 Server running on port ${PORT} in ${env} mode`);
   
-  if (process.env.NODE_ENV !== 'production') {
+  if (env !== 'production') {
     try {
       await open(`http://localhost:${PORT}`);
     } catch (err) {
@@ -207,3 +229,18 @@ app.listen(PORT, async () => {
     }
   }
 });
+
+// 1. Don’t Use http://localhost:${PORT} in Logs for Production
+// In Render or Vercel, your app isn’t accessible at localhost, so the console log might confuse you during remote debugging.
+// const PORT = process.env.PORT || 10000;
+// app.listen(PORT, async () => {
+//   console.log(`🚀 Server running on http://localhost:${PORT}`);
+  
+//   if (process.env.NODE_ENV !== 'production') {
+//     try {
+//       await open(`http://localhost:${PORT}`);
+//     } catch (err) {
+//       console.error('Could not open browser automatically:', err.message);
+//     }
+//   }
+// });
