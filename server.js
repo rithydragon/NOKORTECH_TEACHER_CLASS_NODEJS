@@ -217,6 +217,7 @@ app.get('*', (req, res) => {
 // 8. SERVER START
 // ======================
 const PORT = process.env.PORT || 10000;
+console.log("Port for real running : : , ", PORT)
 app.listen(PORT, async () => {
   const env = process.env.NODE_ENV || 'development';
   console.log(`🚀 Server running on port ${PORT} in ${env} mode`);
