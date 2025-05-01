@@ -57,8 +57,10 @@ const allowedOrigins = [
   process.env.CLIENT_URL, 
   'http://localhost:3000',
   'http://localhost:4582',
+  'https://nokortech.app',
+  'https://nokortechlmsclass.vercel.app',
   'https://nokortechlmsclassapp.vercel.app',
-  'https://nokortech.app'
+  'https://nokortechlmsclass-epdir3tp4-riththylearns-projects.vercel.app' // 👈 Add this!
 ].filter(Boolean);
 
 
