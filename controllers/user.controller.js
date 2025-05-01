@@ -1,5 +1,5 @@
 import User from '../models/user.models.js';
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import UImage from '../models/uimage.models.js';
 import storeUserImage from '../services/storeUserImage.js';
