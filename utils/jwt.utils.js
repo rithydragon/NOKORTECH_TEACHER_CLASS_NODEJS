@@ -5,93 +5,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// export const generateToken = (user) => {
-//   if (!user || !user.UserId || !user.Username || !user.Email) {
-//     return null; // Handle missing data gracefully
-//   }
-
-//   const payload = {
-//     UserId: user.UserId,
-//     Username: user.Username,
-//     Email: user.Email,
-//     Name: user.Name,
-//     NameEnglish: user.EnglishName,
-//     Gender: user.Gender,
-//     PhoneNumber: user.PhoneNumber,
-//     IsActive: user.IsActive,
-//     RoleName: user.RoleName,
-//     Permission: user.PermissionName
-//   };
-
-//   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRES_IN });
-// };
-
-// export const generateAccessToken = (user) => {
-//   // console.log("Generating access token for:", user); // Debugging
-
-//   if (!user || !user.UserId || !user.Username || !user.Email) {
-//     console.error("generateAccessToken: Missing required user data");
-//     return null; // Handle missing data gracefully
-//   }
-
-//   const payload = {
-//     UserId: user.UserId,
-//     Username: user.Username,
-//     Email: user.Email,
-//     Name: user.Name,
-//     NameEnglish: user.EnglishName,
-//     Gender: user.Gender,
-//     PhoneNumber: user.PhoneNumber,
-//     IsActive: user.IsActive,
-//     RoleName: user.RoleName,
-//     Permission: user.PermissionName,
-//   };
-//   return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN });
-// };
-
-
-// export const generateSessionToken = (user) => {
-
-//   const secretKey = process.env.JWT_SECRET; // Make sure this is set
-//   if (!secretKey) {
-//     throw new Error("JWT Secret key is not defined");
-//   }
-//   return jwt.sign(
-//     { UserId: user.UserId, session: true },
-//     secretKey,
-//     { expiresIn: process.env.SESSION_SECRET_EXPIRES_IN } // Session token for client-side use
-//   );
-// };
-
-// export const generateRefreshToken = (user) => {
-//   const payload = {
-//     UserId: user.UserId,
-//     Username: user.Username,
-//     Email: user.Email,
-//     Name: user.Name,
-//     NameEnglish: user.EnglishName,
-//     Gender: user.Gender,
-//     PhoneNumber: user.PhoneNumber,
-//     IsActive: user.IsActive,
-//     RoleName: user.RoleName,
-//     Permission: user.PermissionName
-//   };
-//   return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN } // Longer-lived refresh token
-//   );
-// };
-
-
-
-// export const decodeToken = (token) => {
-//   try {
-//     return jwt.decode(token);
-//   } catch (error) {
-//     console.error('Token decoding failed:', error);
-//     return null;
-//   }
-// };
-
-
 
 export const generateTokens = (user) => {
   console.log('Using secret to SIGN token:', process.env.REFRESH_TOKEN_SECRET);
@@ -114,11 +27,78 @@ export const generateTokens = (user) => {
   return { token, accessToken, refreshToken };
 };
 
-// export const verifyToken = (token, secret) => {
+
+
+// import jwt from 'jsonwebtoken';
+// import dotenv from 'dotenv';
+// // const crypto = require('crypto')
+
+// // Dynamically generated secrets (should be stored securely in real apps)
+// // const accessSecret = crypto.randomBytes(32).toString('base64')
+// // const refreshSecret = crypto.randomBytes(32).toString('base64')
+// dotenv.config();
+// console.log("000000000000000000000000000000000000000000000000000 ",process.env.ACCESS_TOKEN_SECRET)
+// const accessSecret = Buffer.from(process.env.ACCESS_TOKEN_SECRET, 'base64');
+// const refreshSecret = Buffer.from(process.env.REFRESH_TOKEN_SECRET, 'base64');
+
+// console.log("Access Secret :  ---", accessSecret)
+// console.log("Refresh Secret :  ---", refreshSecret)
+
+// // 🎯 Generate tokens
+// export const generateTokens = (data) => {
+//   const accessPayload = {
+//     UserId: data.UserId,
+//     Username: data.Username,
+//     Email: data.Email,
+//     Name: data.Name,
+//     NameEnglish: data.EnglishName,
+//     Gender: data.Gender,
+//     PhoneNumber: data.PhoneNumber,
+//     IsActive: data.IsActive,
+//     RoleName: data.RoleName,
+//     Permission: data.PermissionName
+//   }
+
+//   const refreshPayload = {
+//     UserId: data.UserId
+//   }
+
+//   const accessToken = jwt.sign(accessPayload, accessSecret, {
+//     expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
+//     algorithm: 'HS256'
+//   })
+
+//   const refreshToken = jwt.sign(refreshPayload, refreshSecret, {
+//     expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
+//     algorithm: 'HS256'
+//   })
+
+//   return { accessToken, refreshToken }
+// }
+
+// // ✅ Verify Access Token
+// export const verifyAccessToken = (token) => {
+//   console.log("Verify access token ============> ", token)
 //   try {
-//     return jwt.verify(token, secret);
-//   } catch (error) {
-//     console.error('Token verification failed:', error);
+//     return jwt.verify(token, accessSecret)
+//   } catch (err) {
+//     console.error('Access token verification failed:', err.message);
 //     return null;
 //   }
-// };
+// }
+
+// export const verifyRefreshToken = (token) => {
+//   console.log("Verify refresh token ============> ", token)
+//   try {
+//     return jwt.verify(token, refreshSecret)
+//   } catch (err) {
+//     console.error('Access token verification failed:', err.message);
+//     return null;
+//   }
+// }
+
+// //Usage
+// // import { generateTokens, verifyAccessToken, verifyRefreshToken } from '../utils/jwt.js'
+
+// // // When logging in:
+// // const { accessToken, refreshToken } = generateTokens(userData)

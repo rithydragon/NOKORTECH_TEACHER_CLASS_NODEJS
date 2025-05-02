@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import open from 'open';
+import corsOptions from './web.config.js'
 
 // Initialize app
 const app = express();
@@ -53,45 +54,46 @@ app.use(cookieParser());
 // ======================
 // 3. CORS CONFIGURATION (Moved after basic middleware)
 // ======================
-const allowedOrigins = [
-  process.env.CLIENT_URL, 
-  'http://localhost:3000',
-  'http://localhost:4582',
-  'https://nokortech.app',
-  'https://nokortechlmsclass.vercel.app',
-  'https://nokortechlmsclassapp.vercel.app',
-  'https://nokortechlmsclass-epdir3tp4-riththylearns-projects.vercel.app' // 👈 Add this!
-].filter(Boolean);
+// const allowedOrigins = [
+//   process.env.CLIENT_URL, 
+//   'http://localhost:3000',
+//   'http://localhost:4582',
+//   'https://nokortech.app',
+//   'https://nokortechlmsclass.vercel.app',
+//   'https://nokortechlmsclassapp.vercel.app',
+//   'https://nokortechlmsclass-epdir3tp4-riththylearns-projects.vercel.app' // 👈 Add this!
+// ].filter(Boolean);
 
 
+// // app.use(cors({
+// //   origin: ['https://nokortechlmsclassapp.vercel.app', 'https://nokortech.app'],
+// //   credentials: true
+// // }));
+
+// // Update your CORS middleware to be more permissive in development
 // app.use(cors({
-//   origin: ['https://nokortechlmsclassapp.vercel.app', 'https://nokortech.app'],
-//   credentials: true
+//   origin: function (origin, callback) {
+//        // Allow requests with no origin (like mobile apps or curl)
+//        if (!origin) return callback(null, true);
+
+//     if (process.env.NODE_ENV === 'development') {
+//       return callback(null, true);
+//     } else {
+//       if (allowedOrigins.includes(origin)) {
+//         return  callback(null, true);
+//       } else {
+//         return callback(new Error('Not allowed by CORS: ' + origin));
+//       }
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Set-Cookie'],
+//   // allowedHeaders: ['Content-Type', 'Authorization'],
+//   exposedHeaders: ['Set-Cookie']
 // }));
 
-// Update your CORS middleware to be more permissive in development
-app.use(cors({
-  origin: function (origin, callback) {
-       // Allow requests with no origin (like mobile apps or curl)
-       if (!origin) return callback(null, true);
-
-    if (process.env.NODE_ENV === 'development') {
-      return callback(null, true);
-    } else {
-      if (allowedOrigins.includes(origin)) {
-        return  callback(null, true);
-      } else {
-        return callback(new Error('Not allowed by CORS: ' + origin));
-      }
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Set-Cookie'],
-  // allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Set-Cookie']
-}));
-
+app.use(cors(corsOptions))
 
 
 // Handle preflight requests
@@ -122,7 +124,6 @@ import classes from './routes/class.routes.js';
 import courses from './routes/course.routes.js';
 import student from "./routes/student.routes.js";
 import department from './routes/department.routes.js';
-import refreshToken from './routes/refreshToken.routes.js'
 import score from './routes/score.routes.js';
 import subject from './routes/subject.routes.js';
 import menuRoutes from './routes/menu.routes.js';
@@ -142,7 +143,6 @@ app.use("/", classes);
 app.use("/", courses);
 app.use("/", student);
 app.use('/', department);
-app.use('/', refreshToken);
 app.use('/', score);
 app.use('/', subject);
 app.use('/', menuRoutes);
