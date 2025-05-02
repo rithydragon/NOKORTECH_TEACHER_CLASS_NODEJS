@@ -7,7 +7,7 @@ const allowedOrigins = [
     'https://nokortech.app',
     'https://nokortechlmsclass.vercel.app',
     'https://nokortechlmsclassapp.vercel.app',
-    'https://nokortechlmsclass-dlp27qus9-riththylearns-projects.vercel.app',
+    'https://www.nokortechapp.com',
     'https://nokortechlmsclass-epdir3tp4-riththylearns-projects.vercel.app'
   ].filter(Boolean);
   
