@@ -15,7 +15,6 @@ router.get('/api/attendance/daily_record', StudentAttendanceController.getAttend
 router.get('/api/student_attendance/delete', StudentAttendanceController.deleteAttendance);  //by Id
 router.post('/api/attendance_type/list',authenticate, StudentAttendanceController.getAttendanceByDate);
 
-
 // GET student comprehensive information
 router.post('/api/student_attendance/list', StudentAttendanceController.getStudentComprehensiveInfo);
 
