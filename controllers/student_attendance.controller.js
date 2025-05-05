@@ -1,5 +1,5 @@
 import StudentAttendanceModel from '../models/student_attendance.models.js';
-
+import Student from '../models/student.models.js'
 class StudentAttendanceController {
   // static async createAttendance(req, res) {
   //   try {
@@ -277,6 +277,8 @@ static async updateStudentAttendance2(req, res) {
         ClassId || null, 
         Status || null
       );
+
+      const studentList =  await Student.getAllStudents()
   
       // Calculate summary statistics
       const presentCount = attendance.filter(a => a.AttendanceType === 'Present').length;
@@ -289,12 +291,13 @@ static async updateStudentAttendance2(req, res) {
         success: true,
           meta: {
             StartDate: StartDate || 'All dates',
-          EndDate: EndDate || 'All dates',
+            EndDate: EndDate || 'All dates',
             totalRecords: attendance.length,
             presentCount,
             absentCount,
             attendanceRate
           },
+          student: studentList,
           records: attendance,
           classes: [...new Set(attendance.map(a => ({ 
             ClassId: a.ClassId, 
