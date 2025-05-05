@@ -4,7 +4,7 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:4582',
     'http://localhost:443', // NITRO CLIENT
-    'https://www.angkordragon.space/',
+    'https://www.angkordragon.space',
     'https://www.nokortechapp.com',
   ].filter(Boolean);
   
