@@ -4,10 +4,8 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:4582',
     'http://localhost:443', // NITRO CLIENT
-    'https://nokortech.app',
-    'https://nokortechlmsapp.vercel.app',
+    'https://www.angkordragon.space/',
     'https://www.nokortechapp.com',
-    'https://nokortechlmsclass-epdir3tp4-riththylearns-projects.vercel.app'
   ].filter(Boolean);
   
   const corsOptions = {
