@@ -151,7 +151,7 @@ class UImageController {
 
   // Method to upload image and store metadata
   // Controller method to handle avatar image upload
-  static async uploadImageAvatar(req, res) {
+  static async uploadImageAvatar1(req, res) {
     try {
       // Get UserId from body or fallback to the authenticated user
       console.log("Request Body:", req.body);
@@ -214,6 +214,65 @@ class UImageController {
     }
   }
 
+  static async uploadImageAvatar(req, res) {
+    try {
+      // Debugging logs (remove in production)
+      console.log("Headers:", req.headers);
+      console.log("Content-Type:", req.headers['content-type']);
+      console.log("Body fields:", Object.keys(req.body));
+      console.log("File info:", req.file ? {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      } : null);
+  
+      // Get UserId from form data
+      const userId = req.body.UserId;
+      const createdBy = req.user?.UserId;
+  
+      if (!userId) {
+        return RtyApiResponse(res, 400, 'User ID is required.');
+      }
+  
+      // Validate uploaded file
+      if (!req.file) {
+        return RtyApiResponse(res, 400, 'No file uploaded.');
+      }
+  
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        fs.unlinkSync(req.file.path);
+        return RtyApiResponse(res, 400, 'Only JPG, PNG, or WEBP images are allowed.');
+      }
+  
+      // Validate file size (5MB max)
+      if (req.file.size > 5 * 1024 * 1024) {
+        fs.unlinkSync(req.file.path);
+        return RtyApiResponse(res, 400, 'Image must be smaller than 5MB.');
+      }
+  
+      // Insert image metadata into database
+      const imageId = await UImage.addImage(userId, req.file.path, req.file.mimetype, createdBy);
+  
+      return RtyApiResponse(res, 200, 'Image uploaded successfully!', {
+        imageId,
+        imagePath: req.file.path
+      });
+  
+    } catch (error) {
+      // Clean up uploaded file if error occurred
+      if (req.file?.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (err) {
+          console.error("Error deleting uploaded file:", err);
+        }
+      }
+      console.error("Error uploading image:", error);
+      return RtyApiResponse(res, 500, error.message || 'Failed to upload image.');
+    }
+  }
 
   static async deleteImage(req, res, next) {
     try {
