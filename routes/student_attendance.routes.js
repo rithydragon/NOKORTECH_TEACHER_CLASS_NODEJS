@@ -23,7 +23,8 @@ router.post('/api/student_attendance/daily_record',authenticate, StudentAttendan
 // router.post('/api/student_attendance/daily/:date?', StudentAttendanceController.getDailyAttendance);
 
 // GET attendance by date range
-router.post('/api/student_attendance/date_range_list',authenticate, StudentAttendanceController.getAttendanceByDateRange);
+router.post('/api/student_attendance/date_range_list',StudentAttendanceController.getAttendanceByDateRange);
+router.post('/api/student_attendance/disabled_days',StudentAttendanceController.getDisabledDays);
 
 // GET class attendance summary
 router.get('/api/attendance/class_summary/:date?', StudentAttendanceController.getClassAttendanceSummary);

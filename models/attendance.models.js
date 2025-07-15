@@ -10,6 +10,7 @@ class Attendance {
   }
 
   static async update(id, attendanceData) {
+    console.log("Updating attendance with ID:", id, "and data:", attendanceData);
     const [result] = await pool.query(
       'UPDATE STUDENT_ATTENDANCE SET ? WHERE ID = ?',
       [attendanceData, id]

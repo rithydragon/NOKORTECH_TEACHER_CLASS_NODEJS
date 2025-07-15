@@ -19,7 +19,7 @@ class StudentAttendanceController {
   // //   `INSERT INTO student_attendance (student_id, attendance_date, attendance_type_id, notes) VALUES (?, ?, ?, ?)`,
   // //   [studentId, date, typeId, notes]
   // // );
-  
+
 
   // static async updateAttendance(req, res) {
   //   try {
@@ -60,8 +60,8 @@ class StudentAttendanceController {
 
       const insertedId = await StudentAttendanceModel.createStudentAttendance(attendanceData);
 
-      res.status(201).json({ 
-        success: true, 
+      res.status(201).json({
+        success: true,
         id: insertedId,
         message: 'Attendance record created successfully'
       });
@@ -98,8 +98,8 @@ class StudentAttendanceController {
         return res.status(404).json({ error: 'Attendance record not found' });
       }
 
-      res.status(200).json({ 
-        success: true, 
+      res.status(200).json({
+        success: true,
         updated: affectedRows,
         message: 'Attendance record updated successfully'
       });
@@ -112,24 +112,24 @@ class StudentAttendanceController {
     }
   };
 
-// Controller
-static async updateStudentAttendance2(req, res) {
-  const { id, studentId, typeId, notes, scheduleId, attendanceDate } = req.body;
-  if (!id) return res.status(400).json({ error: "Attendance ID is required for update" });
+  // Controller
+  static async updateStudentAttendance2(req, res) {
+    const { id, studentId, typeId, notes, scheduleId, attendanceDate } = req.body;
+    if (!id) return res.status(400).json({ error: "Attendance ID is required for update" });
 
-  try {
-    await pool.query(`
+    try {
+      await pool.query(`
       UPDATE STUDENT_ATTENDANCE
       SET STUDENT_ID = ?, ATTENDANCE_TYPE_ID = ?, NOTES = ?, SCHEDULE_ID = ?, ATTENDANCE_DATE = ?
       WHERE ID = ?
     `, [studentId, typeId, notes, scheduleId, attendanceDate, id]);
 
-    res.json({ message: "Attendance updated successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Database error during update" });
+      res.json({ message: "Attendance updated successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Database error during update" });
+    }
   }
-}
 
   static async deleteAttendance(req, res) {
     const { Id } = req.query
@@ -219,8 +219,8 @@ static async updateStudentAttendance2(req, res) {
 
   // Get attendance by date range
   static async getAttendanceByDateRangev1(req, res) {
-    console.log( "Att range by query : ",req.query)
-    console.log( "Att range by body : ",req.body)
+    console.log("Att range by query : ", req.query)
+    console.log("Att range by body : ", req.body)
     try {
       const { StartDate, endDate } = req.query;
 
@@ -240,13 +240,13 @@ static async updateStudentAttendance2(req, res) {
     }
   }
 
-  static async getAttendanceByDateRange(req, res) {
-    console.log("Get att by date range --------- : ",req.body)
+  static async getAttendanceByDateRange1(req, res) {
+    console.log("Get att by date range --------- : ", req.body)
     try {
       const { StartDate, EndDate, ClassId, Status } = req.body;
       console.log("Start Date  : ", StartDate)
       console.log("End Date  : ", EndDate)
-  
+
       // if (!StartDate || EndDate) {
       //   return res.status(400).json({ 
       //     success: false,
@@ -254,7 +254,7 @@ static async updateStudentAttendance2(req, res) {
       //     code: 'MISSING_DATE_RANGE'
       //   });
       // }
-  
+
       // // Validate date format (optional)
       // if (StartDate || !isValidDate(StartDate)) {
       //   return res.status(400).json({
@@ -272,41 +272,41 @@ static async updateStudentAttendance2(req, res) {
       // }
 
       const attendance = await StudentAttendanceModel.getAttendanceByDateRange(
-        StartDate || null, 
-        EndDate || null, 
-        ClassId || null, 
+        StartDate || null,
+        EndDate || null,
+        ClassId || null,
         Status || null
       );
 
-      const studentList =  await Student.getAllStudents()
-  
+      const studentList = await Student.getAllStudents()
+
       // Calculate summary statistics
       const presentCount = attendance.filter(a => a.AttendanceType === 'Present').length;
       const absentCount = attendance.filter(a => a.AttendanceType === 'Absent').length;
-      const attendanceRate = attendance.length > 0 
-        ? Math.round((presentCount / attendance.length) * 100) 
+      const attendanceRate = attendance.length > 0
+        ? Math.round((presentCount / attendance.length) * 100)
         : 0;
-  
+
       res.json({
         success: true,
-          meta: {
-            StartDate: StartDate || 'All dates',
-            EndDate: EndDate || 'All dates',
-            totalRecords: attendance.length,
-            presentCount,
-            absentCount,
-            attendanceRate
-          },
-          student: studentList,
-          records: attendance,
-          classes: [...new Set(attendance.map(a => ({ 
-            ClassId: a.ClassId, 
-            ClassName: a.ClassName 
-          })))]
+        meta: {
+          StartDate: StartDate || 'All dates',
+          EndDate: EndDate || 'All dates',
+          totalRecords: attendance.length,
+          presentCount,
+          absentCount,
+          attendanceRate
+        },
+        student: studentList,
+        records: attendance,
+        classes: [...new Set(attendance.map(a => ({
+          ClassId: a.ClassId,
+          ClassName: a.ClassName
+        })))]
       });
     } catch (error) {
       console.error('Error fetching attendance by date range:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         success: false,
         message: 'Failed to fetch attendance records',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined,
@@ -314,7 +314,94 @@ static async updateStudentAttendance2(req, res) {
       });
     }
   }
-  
+
+  static async getAttendanceByDateRange(req, res) {
+    try {
+      const { StartDate, EndDate, ClassId, Status } = req.body;
+
+      // Optional validation (recommended)
+      if ((StartDate && isNaN(Date.parse(StartDate))) || (EndDate && isNaN(Date.parse(EndDate)))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid date format. Use YYYY-MM-DD',
+          code: 'INVALID_DATE_FORMAT'
+        });
+      }
+
+      // Fetch attendance records with optional filters
+      const attendance = await StudentAttendanceModel.getAttendanceByDateRange(
+        StartDate || null,
+        EndDate || null,
+        ClassId || null,
+        Status || null
+      );
+
+      const studentList = await Student.getAllStudents();
+
+      // Summary stats
+      const presentCount = attendance.filter(a => a.AttendanceType === 'Present').length;
+      const absentCount = attendance.filter(a => a.AttendanceType === 'Absent').length;
+      const attendanceRate = attendance.length > 0
+        ? Math.round((presentCount / attendance.length) * 100)
+        : 0;
+
+      // Respond with detailed data
+      res.json({
+        success: true,
+        meta: {
+          StartDate: StartDate || 'All Dates',
+          EndDate: EndDate || 'All Dates',
+          totalRecords: attendance.length,
+          presentCount,
+          absentCount,
+          attendanceRate
+        },
+        student: studentList,
+        records: attendance,
+        classes: [...new Map(attendance.map(a => [`${a.ClassId}`, {
+          ClassId: a.ClassId,
+          ClassName: a.ClassName
+        }])).values()]
+      });
+    } catch (error) {
+      console.error('Error fetching attendance by date range:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch attendance records',
+        code: 'SERVER_ERROR',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  static async getDisabledDays(req, res) {
+    try {
+      let { StartDate, EndDate } = req.body || {}
+
+      // Optional fallback to current month if nothing passed
+      if (!StartDate && !EndDate) {
+        const now = new Date()
+        const year = now.getFullYear()
+        const month = now.getMonth()
+        StartDate = new Date(year, month, 1).toISOString().split('T')[0]
+        EndDate = new Date(year, month + 1, 0).toISOString().split('T')[0]
+      }
+
+      const disabledDays = await StudentAttendanceModel.getDisabledDaysFromDB(StartDate, EndDate)
+
+      res.json({
+        success: true,
+        data: disabledDays
+      })
+    } catch (error) {
+      console.error('Error fetching disabled days:', error)
+      res.status(500).json({
+        success: false,
+        message: 'Failed to load disabled days',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      })
+    }
+  }
 
   // Get class attendance summary
   static async getClassAttendanceSummary(req, res) {
@@ -331,9 +418,9 @@ static async updateStudentAttendance2(req, res) {
     }
   }
 }
-  // Helper function
-  function isValidDate(dateString) {
-    return !isNaN(Date.parse(dateString));
-  }
+// Helper function
+function isValidDate(dateString) {
+  return !isNaN(Date.parse(dateString));
+}
 
 export default StudentAttendanceController;

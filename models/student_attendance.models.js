@@ -375,56 +375,95 @@ WHERE
       sa.ATTENDANCE_DATE BETWEEN ? AND ?
   `;
     const params = [startDate, endDate];
-    
+
     if (classId) {
       query += ' AND cl.ID = ?';
       params.push(classId);
     }
-    
+
     if (status) {
       query += ' AND at.NAME = ?';
       params.push(status);
     }
-    
+
     query += ' ORDER BY sa.ATTENDANCE_DATE, st.NAME';
-    
+
     const [rows] = await db.query(query, params);
     return rows;
   }
+
+  static async getDisabledDaysFromDB1() {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = today.getMonth() + 1 // MySQL MONTH() is 1-based
+
+    const [rows] = await db.query(`
+      SELECT DISTINCT DAY(AttendanceDate) AS Day
+    FROM STUDENT_ATTENDANCE
+    WHERE MONTH(AttendanceDate) = ? AND YEAR(AttendanceDate) = ?
+      AND AttendanceTypeId IS NULL;
+  `, [month, year])
+
+    return rows.map(r => r.Day)
+  }
+
+  static async getDisabledDaysFromDB(startDate = null, endDate = null) {
+    let query = `
+    SELECT DISTINCT DAY(ATTENDANCE_DATE) AS Day
+    FROM STUDENT_ATTENDANCE
+    WHERE ATTENDANCE_TYPE_ID IS NULL
+  `
+    const params = []
+
+    if (startDate && endDate) {
+      query += ' AND ATTENDANCE_DATE BETWEEN ? AND ?'
+      params.push(startDate, endDate)
+    } else if (startDate) {
+      query += ' AND ATTENDANCE_DATE >= ?'
+      params.push(startDate)
+    } else if (endDate) {
+      query += ' AND ATTENDANCE_DATE <= ?'
+      params.push(endDate)
+    }
+
+    const [rows] = await db.query(query, params)
+    return rows.map(r => r.Day)
+  }
+
+
   static async getAttendanceByDateRange(startDate = null, endDate = null, classId = null, status = null) {
     let query = `
-      SELECT
-        sa.ID AS AttendanceId,
-        sa.ATTENDANCE_DATE AS AttendanceDate,
-        st.ID AS StudentId,
-        st.CODE AS StudentCode,
-        st.NAME AS StudentName,
-        cl.ID AS ClassId,
-        cl.NAME AS ClassName,
-        at.CODE AS AttendanceCode,
-        at.NAME AS AttendanceType,
-        sa.NOTES AS AttendanceNotes,
-        cs.SUBJECT_ID AS SubjectId,
-        sub.NAME AS SubjectName,
-        cs.TEACHER_ID AS TeacherId
-      FROM 
-        STUDENT_ATTENDANCE sa
-      LEFT JOIN 
-        STUDENTS st ON sa.STUDENT_ID = st.ID
-      LEFT JOIN
-        ATTENDANCE_TYPES at ON sa.ATTENDANCE_TYPE_ID = at.ID
-      LEFT JOIN
-        CLASS cl ON st.CLASS_ID = cl.ID
-      LEFT JOIN
-        CLASS_SCHEDULES cs ON sa.SCHEDULE_ID = cs.ID
-      LEFT JOIN
-        SUBJECTS sub ON cs.SUBJECT_ID = sub.ID
-      WHERE 1=1
-    `;
-    
+    SELECT
+      sa.ID AS AttendanceId,
+      sa.ATTENDANCE_DATE AS AttendanceDate,
+      st.ID AS StudentId,
+      st.CODE AS StudentCode,
+      st.NAME AS StudentName,
+      cl.ID AS ClassId,
+      cl.NAME AS ClassName,
+      at.CODE AS AttendanceCode,
+      at.NAME AS AttendanceType,
+      sa.NOTES AS AttendanceNotes,
+      cs.SUBJECT_ID AS SubjectId,
+      sub.NAME AS SubjectName,
+      cs.TEACHER_ID AS TeacherId
+    FROM 
+      STUDENT_ATTENDANCE sa
+    LEFT JOIN STUDENTS st ON sa.STUDENT_ID = st.ID
+    LEFT JOIN ATTENDANCE_TYPES at ON sa.ATTENDANCE_TYPE_ID = at.ID
+    LEFT JOIN CLASS cl ON st.CLASS_ID = cl.ID
+    LEFT JOIN CLASS_SCHEDULES cs ON sa.SCHEDULE_ID = cs.ID
+    LEFT JOIN SUBJECTS sub ON cs.SUBJECT_ID = sub.ID
+    WHERE 1=1
+  `;
+
+    if ((startDate && isNaN(Date.parse(startDate))) || (endDate && isNaN(Date.parse(endDate)))) {
+      return res.status(400).json({ message: "Invalid date format" });
+    }
+
     const params = [];
-    
-    // Add date filter only if both dates are provided
+
+    // ✅ Date Filters (safe & flexible)
     if (startDate && endDate) {
       query += ' AND sa.ATTENDANCE_DATE BETWEEN ? AND ?';
       params.push(startDate, endDate);
@@ -435,22 +474,35 @@ WHERE
       query += ' AND sa.ATTENDANCE_DATE <= ?';
       params.push(endDate);
     }
-    
+
+    // ✅ Filter by Class ID
     if (classId) {
       query += ' AND cl.ID = ?';
       params.push(classId);
     }
-    
+
+    // ✅ Filter by Attendance Type (e.g., 'Present', 'Absent')
     if (status) {
       query += ' AND at.NAME = ?';
       params.push(status);
     }
-    
-    query += ' ORDER BY sa.ATTENDANCE_DATE, st.NAME';
-    
+
+    // ✅ Order results consistently
+    query += ' ORDER BY sa.ATTENDANCE_DATE ASC, st.NAME ASC';
+
+    //   if (status) {
+    //   query += ' AND at.CODE = ?'; // More stable
+    //   params.push(status);
+    // }
+
+
+    // 2. Add pagination (optional)
+    // query += ' LIMIT ? OFFSET ?';
+    // params.push(limit, offset);
+
     const [rows] = await db.query(query, params);
     return rows;
-}
+  }
 
 
   // 7. Teacher Attendance Report Query

@@ -14,10 +14,9 @@ class AttendanceController {
     }
   }
 
-
   static async updateAttendance(req, res) {
     try {
-      const affectedRows = await Attendance.update(req.params.id, req.body);
+      const affectedRows = await Attendance.update(req.query.Id, req.body);
       if (affectedRows === 0) {
         return res.status(404).json({ message: 'Attendance record not found' });
       }
