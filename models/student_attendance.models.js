@@ -39,18 +39,44 @@ class StudentAttendanceModel {
     }
   }
 
+  static async updateStudentAttendanceType(typeId,student_id, attendanceData) {
+    try {
+      const [result] = await db.query(
+        `UPDATE STUDENT_ATTENDANCE SET 
+          SCHEDULE_ID = ?,
+          ATTENDANCE_DATE = ?,
+          ATTENDANCE_TYPE_ID = ?,
+          NOTES = ?,
+          UPDATED_BY = ?,
+          UPDATED_DATE = CURRENT_TIMESTAMP
+          WHERE STUDENT_ID = ?`,
+        [
+          attendanceData.schedule_id || null,
+          attendanceData.attendance_date,
+          typeId,
+          attendanceData.notes,
+          updated_by || null,
+          student_id
+        ]
+      );
+      return result.affectedRows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async updateAttendance(id, attendanceData) {
     try {
       const [result] = await db.query(
         `UPDATE STUDENT_ATTENDANCE SET 
-        STUDENT_ID = ?,
-        SCHEDULE_ID = ?,
-        ATTENDANCE_DATE = ?,
-        ATTENDANCE_TYPE_ID = ?,
-        NOTES = ?,
-        UPDATED_BY = ?,
-        UPDATED_DATE = CURRENT_TIMESTAMP
-        WHERE ID = ?`,
+          STUDENT_ID = ?,
+          SCHEDULE_ID = ?,
+          ATTENDANCE_DATE = ?,
+          ATTENDANCE_TYPE_ID = ?,
+          NOTES = ?,
+          UPDATED_BY = ?,
+          UPDATED_DATE = CURRENT_TIMESTAMP
+          WHERE ID = ?`,
         [
           attendanceData.student_id,
           attendanceData.schedule_id || null,
@@ -433,7 +459,7 @@ WHERE
 
   static async getAttendanceByDateRange(startDate = null, endDate = null, classId = null, status = null) {
     let query = `
-    SELECT
+      SELECT
       sa.ID AS AttendanceId,
       sa.ATTENDANCE_DATE AS AttendanceDate,
       st.ID AS StudentId,
@@ -441,7 +467,8 @@ WHERE
       st.NAME AS StudentName,
       cl.ID AS ClassId,
       cl.NAME AS ClassName,
-      at.CODE AS AttendanceCode,
+      at.CODE AS AttendanceTypeCode,
+      at.ID AS AttendanceTypeId,
       at.NAME AS AttendanceType,
       sa.NOTES AS AttendanceNotes,
       cs.SUBJECT_ID AS SubjectId,
@@ -454,8 +481,8 @@ WHERE
     LEFT JOIN CLASS cl ON st.CLASS_ID = cl.ID
     LEFT JOIN CLASS_SCHEDULES cs ON sa.SCHEDULE_ID = cs.ID
     LEFT JOIN SUBJECTS sub ON cs.SUBJECT_ID = sub.ID
-    WHERE 1=1
-  `;
+    WHERE 1=1                             
+    `;
 
     if ((startDate && isNaN(Date.parse(startDate))) || (endDate && isNaN(Date.parse(endDate)))) {
       return res.status(400).json({ message: "Invalid date format" });
@@ -560,6 +587,60 @@ GROUP BY
         cl.ID, cl.NAME`, [date]);
     return rows;
   }
+
+
+  static async getAllAttendanceTypes() {
+    const [rows] = await pool.query('SELECT * FROM ATTENDANCE_TYPES');
+    return rows;
+  };
+
+  static async createAttendanceType(data) {
+    const {
+      Code,
+      Name,
+      Description,
+      IsPresent,
+      ColorCode,
+      CreatedBy,
+    } = data;
+
+    const [result] = await pool.query(
+      `INSERT INTO ATTENDANCE_TYPES (Code, Name, Description, IsPresent, ColorCode, CreatedBy)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+      [Code, Name, Description, IsPresent, ColorCode, CreatedBy]
+    );
+    return result.insertId;
+  };
+
+  static async updateAttendanceType(id, data) {
+    const {
+      Code,
+      Name,
+      Description,
+      IsPresent,
+      ColorCode,
+      UpdatedBy,
+    } = data;
+
+    const [result] = await pool.query(
+      `UPDATE ATTENDANCE_TYPES
+     SET Code = ?, Name = ?, Description = ?, IsPresent = ?, ColorCode = ?, UpdatedBy = ?
+     WHERE ID = ?`,
+      [Code, Name, Description, IsPresent, ColorCode, UpdatedBy, id]
+    );
+
+    return result.affectedRows;
+  };
+
+  static async deleteAttendanceType(id) {
+    const [result] = await pool.query(
+      `DELETE FROM ATTENDANCE_TYPES WHERE ID = ?`,
+      [id]
+    );
+    return result.affectedRows;
+  };
+
 }
+
 
 export default StudentAttendanceModel;

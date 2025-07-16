@@ -74,6 +74,43 @@ class StudentAttendanceController {
     }
   };
 
+  static updateStudentAttendanceType = async (req, res) => {
+    try {
+      const { AttendanceTypeId, StudentId, ScheduleId, Date, TypeId, Notes, UpdatedBy } = req.body;
+
+      // Validate required fields
+      if (!AttendanceTypeId) {
+        return res.status(400).json({ error: 'AttendanceTypeId is required' });
+      }
+
+      const attendanceData = {
+        student_id: StudentId,
+        schedule_id: ScheduleId || null,
+        attendance_date: Date,
+        notes: Notes || null,
+        updated_by: UpdatedBy || null
+      };
+
+      const affectedRows = await StudentAttendanceModel.updateStudentAttendanceType(AttendanceTypeId, StudentId, attendanceData);
+
+      if (affectedRows === 0) {
+        return res.status(404).json({ error: 'Attendance record not found' });
+      }
+
+      res.status(200).json({
+        success: true,
+        updated: affectedRows,
+        message: 'Attendance record updated successfully'
+      });
+    } catch (error) {
+      console.error('Update error:', error);
+      if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+        return res.status(400).json({ error: 'Invalid reference (student, schedule, or type not found)' });
+      }
+      res.status(500).json({ error: 'Failed to update student attendance' });
+    }
+  };
+
   static updateAttendance = async (req, res) => {
     try {
       const { id, studentId, scheduleId, date, typeId, notes, updatedBy } = req.body;
@@ -155,7 +192,6 @@ class StudentAttendanceController {
   }
 
   static async getAttendanceByDate(req, res) {
-    console.log("33333333333333333333333333 ---------------------------------- ", req.body)
     try {
       const attendance = await StudentAttendanceModel.findAttendanceType();
       res.json(attendance);
@@ -163,7 +199,6 @@ class StudentAttendanceController {
       res.status(500).json({ error: error.message });
     }
   }
-
 
   static async getAttendanceType(req, res) {
     try {
@@ -417,6 +452,42 @@ class StudentAttendanceController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async getAll(req, res) {
+    try {
+      const data = await StudentAttendanceModel.findAttendanceType();
+      res.json(data);
+    } catch (err) {
+      res.status(500).json({ Message: err.message });
+    }
+  };
+
+  static async create(req, res) {
+    try {
+      const insertId = await createAttendanceType(req.body);
+      res.status(201).json({ Message: 'Created successfully', InsertId: insertId });
+    } catch (err) {
+      res.status(500).json({ Message: err.message });
+    }
+  };
+
+  static async update(req, res) {
+    try {
+      const updated = await StudentAttendanceModel.updateAttendanceType(req.query.id, req.body);
+      res.json({ Message: updated ? 'Updated successfully' : 'No changes made' });
+    } catch (err) {
+      res.status(500).json({ Message: err.message });
+    }
+  };
+
+  static async remove(req, res) {
+    try {
+      const deleted = await StudentAttendanceModel.deleteAttendanceType(req.params.id);
+      res.json({ Message: deleted ? 'Deleted successfully' : 'Record not found' });
+    } catch (err) {
+      res.status(500).json({ Message: err.message });
+    }
+  };
 }
 // Helper function
 function isValidDate(dateString) {
