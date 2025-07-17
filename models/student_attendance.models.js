@@ -41,27 +41,46 @@ class StudentAttendanceModel {
 
 static async updateStudentAttendanceType(typeId, student_id, attendanceData, updated_by) {
   try {
-    const [result] = await db.query(
-      `UPDATE STUDENT_ATTENDANCE SET 
+    // Start base query and params
+    let query = `
+      UPDATE STUDENT_ATTENDANCE SET 
         ATTENDANCE_TYPE_ID = ?,
         NOTES = ?,
         UPDATED_BY = ?,
         UPDATED_DATE = CURRENT_TIMESTAMP
-      WHERE STUDENT_ID = ? AND SCHEDULE_ID = ? AND ATTENDANCE_DATE = ?`,
-      [
-        typeId,
-        attendanceData.notes,
-        updated_by || null,
-        student_id,
-        attendanceData.schedule_id,
-        attendanceData.attendance_date
-      ]
-    );
+      WHERE STUDENT_ID = ?
+    `;
+    
+    const params = [typeId, attendanceData.notes, updated_by || null, student_id];
+
+    // Dynamically add attendance_date condition
+    if (attendanceData.attendance_date === null || attendanceData.attendance_date === undefined) {
+      query += " AND ATTENDANCE_DATE IS NULL";
+    } else {
+      query += " AND ATTENDANCE_DATE = ?";
+      params.push(attendanceData.attendance_date);
+    }
+
+    // Dynamically add schedule_id condition
+    if (attendanceData.schedule_id === null || attendanceData.schedule_id === undefined) {
+      query += " AND SCHEDULE_ID IS NULL";
+    } else {
+      query += " AND SCHEDULE_ID = ?";
+      params.push(attendanceData.schedule_id);
+    }
+
+    const [result] = await db.query(query, params);
+
+    if (result.affectedRows === 0) {
+      throw new Error("Attendance record not found");
+    }
+
     return result.affectedRows;
   } catch (error) {
     throw error;
   }
 }
+
 
 
   static async updateAttendance(id, attendanceData) {
