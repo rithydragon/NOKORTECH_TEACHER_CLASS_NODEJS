@@ -371,6 +371,7 @@ class StudentAttendanceController {
         ClassId || null,
         Status || null
       );
+      console.log("Attendance records fetched: ", attendance);
 
       const studentList = await Student.getAllStudents();
 
@@ -380,14 +381,13 @@ class StudentAttendanceController {
       const attendanceRate = attendance.length > 0
         ? Math.round((presentCount / attendance.length) * 100)
         : 0;
-
       // Respond with detailed data
       res.json({
         success: true,
         meta: {
           StartDate: StartDate || 'All Dates',
           EndDate: EndDate || 'All Dates',
-          totalRecords: attendance.length,
+          TotalRecords: attendance.length,
           presentCount,
           absentCount,
           attendanceRate
