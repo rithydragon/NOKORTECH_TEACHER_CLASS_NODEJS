@@ -39,31 +39,30 @@ class StudentAttendanceModel {
     }
   }
 
-  static async updateStudentAttendanceType(typeId,student_id, attendanceData) {
-    try {
-      const [result] = await db.query(
-        `UPDATE STUDENT_ATTENDANCE SET 
-          SCHEDULE_ID = ?,
-          ATTENDANCE_DATE = ?,
-          ATTENDANCE_TYPE_ID = ?,
-          NOTES = ?,
-          UPDATED_BY = ?,
-          UPDATED_DATE = CURRENT_TIMESTAMP
-          WHERE STUDENT_ID = ?`,
-        [
-          attendanceData.schedule_id || null,
-          attendanceData.attendance_date,
-          typeId,
-          attendanceData.notes,
-          updated_by || null,
-          student_id
-        ]
-      );
-      return result.affectedRows;
-    } catch (error) {
-      throw error;
-    }
+static async updateStudentAttendanceType(typeId, student_id, attendanceData, updated_by) {
+  try {
+    const [result] = await db.query(
+      `UPDATE STUDENT_ATTENDANCE SET 
+        ATTENDANCE_TYPE_ID = ?,
+        NOTES = ?,
+        UPDATED_BY = ?,
+        UPDATED_DATE = CURRENT_TIMESTAMP
+      WHERE STUDENT_ID = ? AND SCHEDULE_ID = ? AND ATTENDANCE_DATE = ?`,
+      [
+        typeId,
+        attendanceData.notes,
+        updated_by || null,
+        student_id,
+        attendanceData.schedule_id,
+        attendanceData.attendance_date
+      ]
+    );
+    return result.affectedRows;
+  } catch (error) {
+    throw error;
   }
+}
+
 
   static async updateAttendance(id, attendanceData) {
     try {

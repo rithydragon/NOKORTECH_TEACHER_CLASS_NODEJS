@@ -76,7 +76,9 @@ class StudentAttendanceController {
 
   static updateStudentAttendanceType = async (req, res) => {
     try {
-      const { AttendanceTypeId, StudentId, ScheduleId, Date, TypeId, Notes, UpdatedBy } = req.body;
+      const { AttendanceTypeId, StudentId, ScheduleId, Date, TypeId, Notes } = req.body;
+      console.log("Update Student Attendance Type Body: ", req.body);
+      const UpdatedBy = req.user.UserId || null; // Assuming you have user authentication
 
       // Validate required fields
       if (!AttendanceTypeId) {
@@ -88,10 +90,9 @@ class StudentAttendanceController {
         schedule_id: ScheduleId || null,
         attendance_date: Date,
         notes: Notes || null,
-        updated_by: UpdatedBy || null
       };
 
-      const affectedRows = await StudentAttendanceModel.updateStudentAttendanceType(AttendanceTypeId, StudentId, attendanceData);
+      const affectedRows = await StudentAttendanceModel.updateStudentAttendanceType(AttendanceTypeId, StudentId, attendanceData,UpdatedBy);
 
       if (affectedRows === 0) {
         return res.status(404).json({ error: 'Attendance record not found' });
