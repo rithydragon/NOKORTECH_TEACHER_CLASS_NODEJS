@@ -4,7 +4,7 @@ import dayjs from 'dayjs'; // optional for better formatting
 export const getAllSchedules = async () => {
   const [rows] = await db.execute(`
     SELECT 
-      ds.SCHEDULE_ID AS ScheduleId,
+      ds.SCHEDULE_ID AS Id,
       
       ds.CLASS_ID AS ClassId,
       c.NAME AS ClassName,
