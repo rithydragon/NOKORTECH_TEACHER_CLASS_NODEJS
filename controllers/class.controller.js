@@ -102,6 +102,7 @@ export const getAll = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 // Get a class by ID
 export const getClassById = async (req, res) => {
     try {
