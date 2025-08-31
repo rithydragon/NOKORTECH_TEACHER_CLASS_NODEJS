@@ -1,5 +1,9 @@
 import express from 'express';
 const router = express.Router();
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 import { login, register } from "../controllers/auth.controller.js";
 import { checkPermission } from '../middlewares/authorization/index.js'; // The updated checkPermission middleware
@@ -19,6 +23,29 @@ router.post('/api/auth/logout',verifyAccessToken, authenticate, logout, (req, re
 
 router.post('/api/auth/verify_token', authenticate,verifyToken);
 
+// Set web url cookie
+router.get('/api/set_cookie', (req, res) => {
+  const PORT = process.env.PORT || 10000
+  const isProd = process.env.NODE_ENV === 'production'
+  const temp_web_server = isProd
+  ? 'https://nokortechlmsapp.vercel.app'
+  : `http://localhost:${PORT}`
+  
+  res.setHeader('Cache-Control', 'no-store') // 🛑 Disable 304 caching
+  res.cookie('temp_web_server', temp_web_server, {
+    // httpOnly: true,
+    httpOnly: false, // Allow client-side access
+    maxAge: 3600 * 1000, // 1 hour
+    path: '/',
+    secure: isProd,
+    sameSite: 'Lax',
+    ...(isProd && { domain: 'nokortechlmsapp.vercel.app' }) // ✅ only add domain in production
+  })
+
+  res.json({ message: 'Cookie sent to frontend' })
+})
+
+// If you set a domain like .vercel.app when running on localhost, the cookie won't be stored.
 export default router;
 
 // When does refresh token heppend?
