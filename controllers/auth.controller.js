@@ -21,7 +21,6 @@ const tokenBlacklist = new Set();
 export const login = async (req, res) => {
   try {
     const { Username, Password, DeviceId } = req.body;
-    console.log("Body logon : ", req.body)
     const userAgent = req.headers['user-agent'];
     const ipAddress11 = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
@@ -56,7 +55,7 @@ export const login = async (req, res) => {
 
     const validPassword = await bcrypt.compare(Password, user.Password);
     if (!validPassword) {
-      return RtyApiResponse(res, 401, 'Incorrect password');
+      return res.status(401).json({ Message: 'Password incorrect' });
     }
 
     if (!user.UserId) {
@@ -103,8 +102,8 @@ export const login = async (req, res) => {
     `, [user.UserId, DeviceId, refreshToken]);
     // Generate all tokens
 
-     // store refresh token in DB (optional but recommended)
-  await db.query('UPDATE AUTHS SET REFRESH_TOKEN = ? WHERE ID = ?', [refreshToken, user.UserId]);
+    // store refresh token in DB (optional but recommended)
+    await db.query('UPDATE AUTHS SET REFRESH_TOKEN = ? WHERE ID = ?', [refreshToken, user.UserId]);
 
     // // Store refresh token in database
     const refreshUpdated = await AuthsModel.createOrUpdateRefreshToken(user.UserId, refreshToken);
@@ -421,6 +420,7 @@ export async function constuserWithRolePermission(req, res) {
 import { sendEmail, sendPasswordResetEmail } from '../utils/sendEmail.utils.js';
 import Role from '../models/role.models.js';
 import { access } from 'fs';
+import { response } from 'express';
 
 
 export const forgotPassword = async (req, res) => {
@@ -524,7 +524,7 @@ export const getToken = async (req, res) => {
 export const refreshToken = async (req, res) => {
   try {
     console.log("=== Refresh Token Endpoint Hit ===");
-    
+
     // 1. Get refresh token from cookie
     const refreshToken = req.cookies.rty_refresh_token;
     console.log("Refresh token from cookie:", refreshToken || "NOT FOUND");
@@ -607,9 +607,9 @@ export const refreshToken = async (req, res) => {
       message: error.message,
       stack: error.stack
     });
-    
+
     res.clearCookie('rty_refresh_token');
-    
+
     return RtyApiResponse(res, 500, {
       success: false,
       message: 'Internal server error',
