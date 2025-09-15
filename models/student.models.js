@@ -343,10 +343,10 @@ ORDER BY s.NAME;
     return rows;
   }
 
-  static async getById(id) {
-    const [rows] = await db.query('SELECT * FROM STUDENTS WHERE ID = ?', [id]);
-    return rows[0];
-  }
+  // static async getById(id) {
+  //   const [rows] = await db.query('SELECT * FROM STUDENTS WHERE ID = ?', [id]);
+  //   return rows[0];
+  // }
 
   static async create(studentData) {
     const [result] = await db.query('INSERT INTO STUDENTS SET ?', studentData);

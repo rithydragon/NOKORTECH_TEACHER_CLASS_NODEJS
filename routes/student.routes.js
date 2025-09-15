@@ -13,15 +13,15 @@ router.use(authenticate);
 // CRUD Routes
 router.post('/api/student/create', create);
 router.post('/api/student/getInfo', getStudentById);
-router.put('/api/student/update/:id', update);
-router.delete('/api/student/delete/:id', deleteStudents);
+// router.put('/api/student/update/:id', update);
+// router.delete('/api/student/delete/:id', deleteStudents);
 router.post('/api/student/list', getAllStudents);
 
 //Report Routes
 // router.get('/api/students/list', getAllStudentData);
-router.post('/api/students/create', createStudent);
+// router.post('/api/students/create', createStudent);
 // router.post('/api/students/list/import', uploadMiddleware.single('file'), importStudents);
-router.post('/api/students/list/import', uploadMiddleware, importStudents);
+// router.post('/api/students/list/import', uploadMiddleware, importStudents);
 
 
 
