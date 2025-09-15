@@ -240,7 +240,7 @@ export const getStudentById =  async (req, res, next) => {
           return res.status(404).json({ message: 'Student not found' });
       }
       const scores = await Score.getByStudentId(student.ID);
-      res.json({ ...student, Score:scores });
+      res.json({ ...student, scores });
   } catch (error) {
       next(error);
   }
