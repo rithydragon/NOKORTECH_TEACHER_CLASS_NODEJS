@@ -117,19 +117,6 @@ export const getAllStudents = async (req, res) => {
   }
 };
 
-// ✅ Get student by ID
-export const getStudentById1 = async (req, res) => {
-  const studentId  = req.params.id; // Get studentId from the request body
-  try {
-    const student = await Student.getById(studentId);
-    // const student = await Student.getById(req.params.id);
-    if (!student) return res.status(404).json({ message: "Student not found" });
-    res.json(student);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 // ✅ Create a new student
 export const createStudent = async (req, res) => {
   try {
@@ -242,13 +229,18 @@ export const getAllStudentData =  async (req, res, next) => {
 }
 
 export const getStudentById =  async (req, res, next) => {
+  console.log('getStudentById called with req.query:', req);
+  const id = req.query.Id || req.body.Id; // Support both GET (query) and POST (body)
+  if (!id) {
+      return res.status(400).json({ message: 'Student ID is required' });
+  }
   try {
-      const student = await Student.getById(req.params.id);
+      const student = await Student.getById(id);
       if (!student) {
           return res.status(404).json({ message: 'Student not found' });
       }
       const scores = await Score.getByStudentId(student.ID);
-      res.json({ ...student, scores });
+      res.json({ ...student, Score:scores });
   } catch (error) {
       next(error);
   }
