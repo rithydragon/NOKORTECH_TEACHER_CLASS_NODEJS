@@ -166,7 +166,6 @@ export const login = async (req, res) => {
 
 
     // Prepare user data
-
     const userData = {
       Id: user.UserId,
       Name: user.Name,
