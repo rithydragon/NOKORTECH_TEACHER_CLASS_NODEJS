@@ -7,10 +7,11 @@ import dotenv from 'dotenv';
 import db from '../config/db.js';
 import crypto from 'crypto';
 
+
 import { generateTokens } from '../utils/jwt.utils.js';
 dotenv.config();
 import bcrypt from 'bcryptjs';
-import { successResponse, errorResponse, RtyApiResponse } from '../utils/response.utils.js';
+import { errorResponse, RtyApiResponse } from '../utils/response.utils.js';
 
 // In-memory store for refresh tokens (in production, use Redis or database)
 let refreshTokens = [];
