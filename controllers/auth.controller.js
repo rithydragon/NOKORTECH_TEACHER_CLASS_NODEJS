@@ -31,9 +31,6 @@ export const login = async (req, res) => {
       req.socket?.remoteAddress ||
       req.ip;
 
-    console.log("userAgent ========", userAgent)
-    console.log("ipAddress ========", ipAddress)
-
     if (!Username) {
       return errorResponse(res, 501, 'Username are required');
     }
@@ -64,7 +61,6 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: 'User ID is missing' });
     }
 
-    console.log("User id -------=------------", user.UserId)
     // ✅ Save login history
     try {
       await db.query(`

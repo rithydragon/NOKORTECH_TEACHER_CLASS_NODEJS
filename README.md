@@ -64,84 +64,6 @@ DB_REMOTE_PASSWORD=AVNS_VhWUzPMwUQ35IvZ-TXb
 DB_REMOTE_DATABASE=NOKORTECH_LMS_DB
 DB_REMOTE_PORT=21299
 
-```
-USERS : 153;
-STUDENTS :103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-;
-ATTENDANCE_TYPES : 1
-2
-3
-4
-5;
-CLASS_SCHEDULES : ;
-SUBJECTS : 11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-;
-COURSES : 11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-;
-TEACHERS : 139
-140
-141
-142
-143
-144
-153
-244
-246
-247
-248
-249
-250
-251
-252
-253
-254
-256
-257
-258
-259
-260;
-
 ### Git Command Line
 ```` Command line instructions
 You can also upload existing files from your computer using the instructions below.
@@ -195,42 +117,6 @@ git remote rename origin old-origin
 git remote add origin git@gitlab.com:thesis202501/NOKORTECH_TEACHER_CLASS_NODEJS.git
 git push --set-upstream origin --all
 git push --set-upstream origin --tags
-
-
-```
-
-If you want to keep using this line:
-
-js
-Copy
-Edit
-import db from '../config/db.js';
-Then at the bottom of your db.js file, change this:
-
-js
-Copy
-Edit
-export default mysql.createPool(remoteConfig); // or: export default db;
-Make sure you're using export default.
-
-Option 2: Use Named Import Instead
-If your db.js exports like this:
-
-js
-Copy
-Edit
-export const db = mysql.createPool(config);
-Then update your import:
-
-js
-Copy
-Edit
-import { db } from '../config/db.js';
-
-Compressing/Optimizing Uploaded Images
-npm install sharp
-
-
 
 ### Auths flow
 ```Code
