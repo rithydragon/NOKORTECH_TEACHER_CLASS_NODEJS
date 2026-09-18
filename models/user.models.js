@@ -711,6 +711,7 @@ WHERE U.ID = ?;
 
     // Find user by username
     static async findByUsername(username) {
+        console.log("Username ====================> ", username)
         const query = `
             SELECT 
                 U.ID AS UserId,

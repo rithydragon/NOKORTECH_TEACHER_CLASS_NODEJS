@@ -16,7 +16,6 @@ const sslEnabled = ['ca.pem', 'service.cert', 'service.key'].every(file =>
 // console.log('Remote DB User:', process.env.REMOTE_USER);
 // console.log('Remote DB Password:', process.env.REMOTE_PASSWORD);
 // console.log('Remote DB Name:', process.env.REMOTE_DATABASE);
-
 // Define local and remote config
 const localConfig = {
   host: '127.0.0.1',
@@ -37,9 +36,9 @@ const remoteConfig = {
   // ssl: {
   //   ca: fs.readFileSync(path.join(__dirname, 'path_to_cert', 'ca-cert.pem'))  // Replace with the actual path to your SSL certificate
   // },
-  ssl: {
-    ca: readFileSync(join(__dirname, '', 'ca.pem'))  // Replace with the actual path to your SSL certificate
-  },
+  // ssl: {
+  //   ca: readFileSync(join(__dirname, '', 'ca.pem'))  // Replace with the actual path to your SSL certificate
+  // },
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -49,9 +48,10 @@ const remoteConfig = {
 // Function to create a MySQL pool
 const createDBPool = async (config, dbType) => {
   try {
-    const pool = await mysql.createPool(config);
-    await pool.getConnection(); // Test connection
+    const pool = mysql.createPool(config);
+    const connection = await pool.getConnection(); // Test connection
     console.log(`✅ Connected to ${dbType} MySQL at ${config.host}`);
+    connection.release(); // Release the connection
     return pool;
   } catch (err) {
     console.error(`❌ Error connecting to ${dbType} MySQL (${config.host}):`, err.message);
@@ -71,25 +71,6 @@ if (!db) {
   console.error("❌ No database connection established. Exiting...");
   process.exit(1);
 }
-
-// // / Test connection on startup
-// async function testConnection() {
-//   let conn;
-//   try {
-//     conn = await createDBPool.getConnection();
-//     await conn.ping();
-//     console.log('Database connected successfully');
-//   } catch (error) {
-//     console.error('Database connection failed:', error);
-//     throw error;
-//   } finally {
-//     if (conn) conn.release();
-//   }
-// }
-
-// // Call immediately and periodically
-// testConnection();
-// setInterval(testConnection, 300000); // Test every 5 minutes
 
 // Export the database connection pool
 export default db;
