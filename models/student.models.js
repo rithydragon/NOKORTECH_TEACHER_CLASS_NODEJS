@@ -229,7 +229,7 @@ ORDER BY s.NAME;
     const [rows] = await db.query(query, [id]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Student not found' });
+      return null;
     }
     return rows[0] || null;
   }

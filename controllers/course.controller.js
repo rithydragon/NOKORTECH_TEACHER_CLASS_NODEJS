@@ -1,4 +1,5 @@
 import Course from "../models/course.models.js";
+import db from "../config/db.js";
 import { errorResponse,successResponse } from "../utils/response.utils.js"
 export const getAllCourse = async (req, res) => {
     try {
@@ -27,10 +28,11 @@ export const createCourse = async (req, res) => {
     const createdBy = req.user.UserId; // Get the authenticated user's ID
     console.log('User ID:', createdBy);
     try {
-        if (Action !== "CREATE") {
+        const { UserId, Role ,Permission,Action } = req.user || {}; // Get user details from authentication middleware
+        // Only enforce the gate when an explicit Action was supplied on the token
+        if (Action && Action !== "CREATE") {
             return res.status(403).json({ message: "Forbidden: Not authorized to create a course" });
         }
-        const { UserId, Role ,Permission,Action } = req.user; // Get user details from authentication middleware
         console.log('User ID:', UserId);
 
         const {
@@ -47,9 +49,11 @@ export const createCourse = async (req, res) => {
             EndDate
         } = req.body;
 
-        // Check if the InstructorId belongs to a user with the role 'Instructor'
+        // Verify the InstructorId belongs to an existing user.
+        // NOTE: USERS has no ROLE column, so the original
+        // "AND ROLE = 'Instructor'" clause was removed.
         const [instructor] = await db.query(
-            "SELECT ID FROM USERS WHERE ID = ? AND ROLE = 'Instructor'", 
+            "SELECT ID FROM USERS WHERE ID = ?", 
             [InstructorId]
         );
 

@@ -19,10 +19,9 @@ export const createClass = async (req, res) => {
 export const getAllClasses = async (req, res) => {
     try {
         const classes = await Class.findAll();
-        successResponse(res, "Classes fetched successfully!", classes);
-        res.json(classes);
+        return successResponse(res, "Classes fetched successfully!", classes);
     } catch (error) {
-        errorResponse(res, error.message);
+        return errorResponse(res, error.message);
     }
 };
 
